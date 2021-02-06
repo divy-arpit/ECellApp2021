@@ -1,10 +1,11 @@
 import 'package:ecellapp/screens/forgot_password/cubit/forgot_password_cubit.dart';
+import 'package:ecellapp/screens/forgot_password/widgets/otp_field.dart';
 import 'package:ecellapp/widgets/email_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ForgotPassword extends StatelessWidget {
+class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
 
@@ -12,14 +13,34 @@ class ForgotPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(
-        listener: (context, state) {},
+        listener: (context, state) {
+          if (state is ForgotPasswordError) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(content: Text(state.error)),
+            );
+          } else if (state is ForgotPasswordCorrectOTP) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(content: Text("Correct OTP")),
+            );
+          } else if (state is ForgotPasswordWrongOTP) {
+            Scaffold.of(context).showSnackBar(
+              SnackBar(content: Text("Wrong OTP")),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is ForgotPasswordInitial) {
             return _initialForgotPasswrod(context);
           } else if (state is ForgotPasswordLoading) {
             return _buildLoading();
           } else if (state is ForgotPasswordEnterOTP) {
-            return _enterOTP();
+            return _enterOTP(context);
+          } else if (state is ForgotPasswordWrongOTP) {
+            return _enterOTP(context);
+          } else if (state is ForgotPasswordCorrectOTP) {
+            return _correctOTP();
+
+            /// TODO redirect to next screen
           } else {
             return _initialForgotPasswrod(context);
           }
@@ -51,16 +72,34 @@ class ForgotPassword extends StatelessWidget {
     );
   }
 
-  Widget _enterOTP() {
+  Widget _enterOTP(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(40.0),
       child: Column(
         children: [
           Text("Enter otp"),
-          EmailField(emailController),
-          FlatButton(onPressed: () {}, child: Text("Press me")),
+          OTPField(otpController),
+          FlatButton(
+              onPressed: () {
+                _verifyOtp(context);
+              },
+              child: Text("Press me")),
         ],
       ),
+    );
+  }
+
+  Widget _wrongOTP() {
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Text("Wrong OTP"),
+    );
+  }
+
+  Widget _correctOTP() {
+    return Padding(
+      padding: const EdgeInsets.all(40.0),
+      child: Text("correct OTP"),
     );
   }
 
@@ -71,6 +110,6 @@ class ForgotPassword extends StatelessWidget {
 
   void _verifyOtp(BuildContext context) {
     final cubit = context.read<ForgotPasswordCubit>();
-    cubit.verifyOTP(int.parse(otpController.text));
+    cubit.verifyOTP(otpController.text);
   }
 }

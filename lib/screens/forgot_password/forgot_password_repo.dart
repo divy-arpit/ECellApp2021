@@ -5,7 +5,7 @@ import 'package:ecellapp/core/res/errors.dart';
 abstract class ForgotPasswordRepository {
   Future<int> generateOTP(String email);
 
-  Future<bool> VerifyOTP(int x);
+  Future<bool> verifyOTP(String x);
 }
 
 class FakeForgotPasswordRepository implements ForgotPasswordRepository {
@@ -22,9 +22,9 @@ class FakeForgotPasswordRepository implements ForgotPasswordRepository {
     }
   }
 
-  Future<bool> VerifyOTP(int x) async {
+  Future<bool> verifyOTP(String x) async {
     await Future.delayed(Duration(seconds: 2));
-    if (x == 1234) {
+    if (x == "1234") {
       return true;
     } else {
       return false;

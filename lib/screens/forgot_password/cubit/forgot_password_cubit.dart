@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:ecellapp/core/res/errors.dart';
 import 'package:ecellapp/screens/forgot_password/forgot_password_repo.dart';
 import 'package:meta/meta.dart';
+import 'package:ecellapp/core/res/strings.dart';
 
 part 'forgot_password_state.dart';
 
@@ -14,12 +15,18 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     try {
       emit(ForgotPasswordLoading());
       int x = await _forgotPasswordRepository.generateOTP(email);
+      emit(ForgotPasswordEnterOTP());
     } on NetworkException {
-      emit(ForgotPasswordError());
+      emit(ForgotPasswordError(S.networkException));
     }
   }
 
-  Future<int> verifyOTP(int a) async {
-    _forgotPasswordRepository.VerifyOTP(a);
+  Future<void> verifyOTP(String a) async {
+    bool b = await _forgotPasswordRepository.verifyOTP(a);
+    if (b) {
+      emit(ForgotPasswordCorrectOTP());
+    } else {
+      emit(ForgotPasswordWrongOTP());
+    }
   }
 }
